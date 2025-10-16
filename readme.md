@@ -85,7 +85,7 @@ Notebook overview (high level)
    - Query by timestamp:
      SELECT * FROM demo.db.insurance TIMESTAMP AS OF 'YYYY-MM-DD HH:MM:SS.ssssss';
 
-Notes and tips
+## 4. Notes and tips
 - The notebook uses SQL magic cells (%%sql). If your Jupyter environment does not support SQL magics, run the SQL statements using Spark SQL from Python:
   spark.sql("SELECT * FROM demo.db.insurance").show()
 - Ensure your SparkSession is configured with the Iceberg catalog you intend to use. The example assumes a catalog that supports namespace `demo.db`; adjust the catalog and namespace for your environment.
@@ -93,7 +93,7 @@ Notes and tips
 - The sample dataset is small and intended for demonstration purposes only.
 Docker Compose setup
 
-Overview
+## 5. Overview
 - This repository includes a compose file at [docker-compose.yaml](docker-compose.yaml:1) that orchestrates:
   - spark-iceberg — Jupyter Lab + Spark UI container. Ports exposed: 8888 (Jupyter), 8080 (Spark UI), 10000/10001 (Spark Thrift). Binds local directories:
     - ./warehouse → /home/iceberg/warehouse
@@ -101,53 +101,3 @@ Overview
   - rest — Iceberg REST fixture on port 8181. Configured to use MinIO as the S3 backend.
   - minio — S3-compatible storage on port 9000 (API) and 9001 (console). Uses admin/password credentials by default.
   - mc — MinIO client used to initialize the warehouse bucket and set a public policy on startup.
-
-Prerequisites
-- Docker (latest recommended)
-- Docker Compose v2 (available via the docker CLI as docker compose)
-- Optional: If you intend to build a custom Spark image locally, ensure a ./spark directory exists. If you do not have a local build context, remove the build directive at [docker-compose.yaml](docker-compose.yaml:5).
-
-Start the stack
-1. From the repository root, start all services:
-   - docker compose up -d
-2. Retrieve Jupyter Lab’s access URL/token (first run prints the token in logs):
-   - docker compose logs -f spark-iceberg
-   - Look for a line containing a URL similar to http://127.0.0.1:8888/lab?token=...
-3. Access services:
-   - Jupyter Lab: http://localhost:8888
-   - Spark UI: http://localhost:8080
-   - Iceberg REST: http://localhost:8181
-   - MinIO Console: http://localhost:9001 (username: admin, password: password)
-   - MinIO S3 endpoint (for SDKs/tools): http://localhost:9000
-
-Use the notebook inside the container
-- The notebooks directory is mounted into the container at /home/iceberg/notebooks/notebooks.
-- Open Jupyter Lab and navigate to the mounted path to find the exported notebook: [notebooks/Explore Iceberge.py](notebooks/Explore%20Iceberge.py:1).
-- The sample dataset is included at [notebooks/dataset/insurance.csv](notebooks/dataset/insurance.csv); it will also be visible inside the container via the notebooks mount.
-
-Notes
-- Credentials and endpoints:
-  - AWS_ACCESS_KEY_ID=admin, AWS_SECRET_ACCESS_KEY=password, AWS_REGION=us-east-1 (used consistently across services to match MinIO).
-  - The rest service is configured to point to MinIO (S3FileIO) and uses the bucket created by the mc container.
-- Initialization:
-  - The mc service waits for MinIO, then creates a warehouse bucket and applies a public policy.
-  - The spark-iceberg container depends_on rest and minio to ensure they start first.
-- Ports:
-  - 8888 (Jupyter), 8080 (Spark UI), 8181 (Iceberg REST), 9000 (MinIO API), 9001 (MinIO Console), 10000/10001 (Spark Thrift).
-  - If a port is already in use on your host, stop the conflicting service or change the published port in [docker-compose.yaml](docker-compose.yaml:1).
-
-Stop the stack
-- To stop containers: docker compose down
-- Data persistence and cleanup:
-  - Bind mounts for ./warehouse and ./notebooks store data on your host and persist across restarts.
-  - To also remove named volumes (if any are added later), you can run docker compose down -v. Bind-mounted host directories are not deleted by -v.
-
-Troubleshooting
-- Jupyter not reachable:
-  - Confirm containers are healthy: docker compose ps
-  - Check logs for spark-iceberg: docker compose logs spark-iceberg
-- MinIO access issues:
-  - Verify the console at http://localhost:9001 loads and you can log in.
-  - Check that mc has initialized the warehouse bucket: docker compose logs mc
-- Port conflicts:
-  - Edit published ports in [docker-compose.yaml](docker-compose.yaml:1) if needed, then recreate: docker compose down && docker compose up -d
