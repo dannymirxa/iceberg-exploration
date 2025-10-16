@@ -2,7 +2,28 @@
 
 This repository demonstrates using Apache Iceberg with PySpark inside a Jupyter notebook. The primary notebook is [`notebooks/Explore Iceberge.py`](notebooks/Explore%20Iceberge.py:1) (a plain-text export of the original notebook). The notebook showcases creating an Iceberg namespace/table, loading a CSV dataset, partitioning, schema evolution, metadata inspection, and time travel queries.
 
-Project layout
+## 1. Setup
+
+1.1 Pull this repo
+
+```bash
+git clone https://github.com/dannymirxa/iceberg-exploration.git
+```
+
+1.2 Go into thr directory
+
+```bash
+cd iceberg-exploration
+```
+
+1.3 Run Docker Compose
+
+```bash
+docker compose up -d
+```
+
+## 2. Project layout
+
 - [`notebooks/Explore Iceberge.py`](notebooks/Explore%20Iceberge.py:1) — Main notebook (exported as a .py file). Walks through:
   - Creating an Iceberg namespace
   - Reading the CSV dataset
@@ -11,16 +32,16 @@ Project layout
   - Demonstrating schema evolution (add/rename/drop column)
   - Viewing schema history and snapshots
   - Time travel queries by snapshot ID and timestamp
-- notebooks/dataset/insurance.csv — Sample dataset used by the notebook
-- docker-compose.yaml — (If present) may contain services used when running locally; review it before use.
+- notebooks/dataset/insurance.csv — Sample dataset used by the notebook. [Source](https://www.kaggle.com/datasets/mosapabdelghany/medical-insurance-cost-dataset)
+- docker-compose.yaml — contain services used when running locally; review it before use.
+
+
+## 3. Steps
 
 Quick start (run the notebook)
-1. Install dependencies and ensure Spark with Iceberg is available to your PySpark environment.
-2. From the repository root run Jupyter:
-   jupyter lab
-   or
-   jupyter notebook
-3. Open the notebook file labelled `Explore Iceberge` (or run the exported script cells). The Python-exported notebook is at [`notebooks/Explore Iceberge.py`](notebooks/Explore%20Iceberge.py:1).
+
+1. Go to ```localhost:8888```
+2. Open the notebook file labelled `Explore Iceberge` (or run the exported script cells). The Python-exported notebook is at [`notebooks/Explore Iceberge.py`](notebooks/Explore%20Iceberge.py:1).
 
 Notebook overview (high level)
 1. Spark session
@@ -50,12 +71,8 @@ Notebook overview (high level)
    - Run EXPLAIN to see partition pruning for queries filtering by `region`.
 
 6. Schema evolution
-   - Add a new column:
-     ALTER TABLE demo.db.insurance ADD COLUMN policy_id STRING;
    - Rename an existing column:
      ALTER TABLE demo.db.insurance RENAME COLUMN sex TO gender;
-   - Drop a column:
-     ALTER TABLE demo.db.insurance DROP COLUMN policy_id;
    - Query the table after each change to observe results.
 
 7. Schema history and metadata
